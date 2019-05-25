@@ -1,0 +1,299 @@
+---
+title: 'Assignment II '
+author: ''
+date: "February 4, 2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+> Please submit your answers by 5.59 pm Monday February 4, 2019.  Remember to show your work. In other words, always use echo=TRUE for the R code chunks that you provide. NOTE - All plots must show proper title, axis lables, and any legends used. Points will be deducted otherwise. Submissions must be made in HTML. Problem 6 has an additional submission to be made in DOCX or PDF format. 
+
+##### Initialization
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Use this space to call any libraries here
+rm(list=ls())
+library(plyr)
+library(dplyr)
+library(lubridate)
+library(grid)
+library(ggplot2)
+
+```
+
+##### Section 1: Plotting
+Q1) In Lecture 3, we worked with two datasets: "case_patients.csv" and "control_patients.csv" (under Files -> lectures -> lecture_3). We will use those files again in this question. 
+
+
+a) Plot a box plot of LOS ~ outcome for the whole cohort. You will have to combine case and control into a single dataset with the outcome for this purpose (as shown in the lecture notes). Write down any observations.
+
+Ans. 
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Insert code below
+#read in datasets
+d1_case <- read.csv("case_patients.csv", header = TRUE)
+d2_control <- read.csv("control_patients.csv", header = TRUE)
+
+#add columns for outcome: 1 = case, 0 = control
+d1_case$outcome <- rep(1,nrow(d1_case))
+d2_control$outcome <- rep(0, nrow(d2_control))
+
+
+#combine both datasets into a single dataset 
+combined_data <- full_join(d1_case,d2_control)
+
+#assign factors to outcome
+combined_data <- combined_data %>%
+  mutate(case= as.factor(outcome==1),control=as.factor(outcome==0))
+
+
+#create a boxplot of LOS ~ outcome
+attach(combined_data)
+boxplot(los~outcome, main="LOS~Outcome Box Plot",xlab="outcome", ylab="los",ylim = c(0,45))
+
+#another option to create boxplot of LOS ~ outcome
+bp_try <- ggplot(combined_data,aes(y=los, x=outcome)) +
+  geom_boxplot(outlier.colour = "black", outlier.shape = 16,
+               outlier.size = 2, notch = FALSE) +
+  theme_classic()
+plot(bp_try + ylim(0,45) + ggtitle("LOS~Outcome Box Plot"))
+
+#Observations
+cat("Mean LOS for control",mean(d2_control$los), "\n")
+cat("Mean LOS for case",mean(d1_case$los), "\n")
+
+#Outliers in length of stay for the control made the boxplot difficult to compare data. Trimmed down the y-axis to 0-45 days to see distribution. The average LOS for case patients is ~21 days, while the average LOS for control patients is ~10 days. Ideally, this makes sense that case patients would stay in the hospital for a longer duration. 
+
+
+```
+
+b) Plot a box plot of LOS ~ gender for the two groups in separate graphs. Write down any observations. 
+
+Ans. 
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Insert code below
+
+
+### think we have to make 2 different graphs of LOS ~ gender for the case and the controls 
+#Option 1
+bp_test <- ggplot(combined_data,aes(y=los, x=gender,fill=outcome)) +
+  geom_boxplot(outlier.colour = "black", outlier.shape = 16,
+               outlier.size = 2, notch = FALSE) +
+  theme_classic()
+plot(bp_test + ylim(0,35) + ggtitle("LOS~Gender Box Plot for Cases vs. Controls"))
+
+
+#create a boxplot of LOS ~ gender (WRONG)
+
+attach(combined_data)
+boxplot(los~gender, main="LOS~Gender Box Plot",xlab="gender", ylab="los", ylim = c(0,35)) 
+
+males <- combined_data[which(combined_data$gender == 'male'),]
+females <- combined_data[which(combined_data$gender == 'female'),]
+
+summary(males)
+summary(females)
+
+#observations? Outliers in length of stay in the male column makes the boxplot difficult to compare data. Trimmed down the y-axis to 0-35 days to see distribution. The average length of stay for males and females was ~11 days.
+```
+
+
+##### Section 2: Odds and odds ratios calculation
+Q2) In a case-cohort study of 2000 patients studying renal disease caused by smoking, a group found the following numbers.   
+1. A total of 300 patients suffered renal disease  
+2. A total of 1000 patients were smokers  
+3. Two-thirds of the patients who suffered renal disease smoked.  
+
+
+(a) Identify the primary exposure and outcome of interest.  
+
+Ans. outcome = patients with renal disease, exposure = smoking (patients with renal disease ~ smoking)
+
+(b) Complete the below 2x2 table of exposure (on row) against outcome (on column).  
+
+Ans.
+
+Table        | Renal Disease | No Renal Disease | Total
+-------------|---------------|------------------|----------
+Smokers      |      200      |        800       | 1000
+Non-smokers  |      100      |        900       | 1000
+Total        |      300      |        1700      | 2000    
+
+(c) Calculate the odds ratio of incidence of renal disease among smokers.
+
+Ans. 
+
+OR (case: renal disease among smokers) = 200/100 = 2 
+OR (control: no renal disease among non-smokeres) = 8/9
+OR = case/control = 2/(8/9) = 18/8 = 2.25
+
+OR > 1; risk of renal disease is increased by 25% with smoking
+
+Q3) Answer the following:   
+
+(a) Suppose that an individual has a 18% chance of defaulting on their credit card payment. What are the odds that this individual will default?    
+
+Ans. 
+
+p(x) = 0.18
+1- p(x) = 1 - 0.18 = 0.82
+Odds = p(x) / (1-p(x) = 0.18/0.82 = 0.219 ~ 22% 
+
+
+(b) On average, what fraction of people with an odds of 0.4 of defaulting on their credit card payment will actually default?  
+
+Ans. 
+
+OR = case/control 
+odds = p(x)/(1-p(x))
+0.4 = p(x)/(1-p(x))
+rearrange equation:
+0.4 = 1.4p(x)
+p(x) = 0.4/1.4 = 0.285 ~ 0.29
+
+##### Section 3: Study design
+
+Q4) A hospital H noticed that approximately 10% of patients who underwent a particularly surgery (surgery S) also developed infection during their post-surgery recovery period. For surgery S, the post-surgery recovery period is 2 weeks. It is suspected a majority of these patients (about 60%) may have taken a particular antibiotic (ABX) during a 3-month period prior to the surgery. ABX could kill the "good" bacteria in the patients body causing the patient to be prone to infection after the surgery.  
+
+(a) What is the outcome of interest and the exposure of interest in this study? 
+
+Ans. 
+- outcome = Develop post-surgery infection
+- exposure = Took antibiotic ABX 3 months prior to surgery (patients that develop post-surgery infection ~ took antibiotic ABX 3 months prior to surgery) 
+
+(b) Design a matched case-control study (matched on age and gender) that will allow a researcher to test this hypothesis. Identify inclusion and exclusion criteria. 
+
+    Define case vs. control!
+     You want to see if the exposure (ABX use) is related to the outcome. So you need to identify cases/controls. 
+     cases = patients who had surgery and developed an infection. 
+     controls = patients who had surgery and did not develop infection.
+
+   
+Ans. 
+1) outcome = Develop post-surgery infection (Y/N)
+2) exposure = Took antibiotic ABX 3 months prior to surgery S (Y/N)
+3) inclusion criteria: took ABX <= 3 months, LOS post-surgery <= 2 weeks, age >= 18, include equal numbers of both genders (M/F)
+4) exclusion criteria: not taking ABX at all and taking ABX > 3 months, LOS > 2 weeks, age < 18
+
+(c) Design a retrospective cohort study that will allow a researcher to test this hypothesis. Identify inclusion and exclusion criteria. 
+
+Ans. 
+1) exposure = Took ABX 3 months prior to having surgery S (Y/N)
+2) outcome = Developed post-surgery infection (Y/N)
+3) inclusion criteria: took ABX <= 3 months, LOS <= 2 weeks, age >= 18, include equal numbers of both genders (M/F), obtain patient data from "x" years prior
+4) exclusion criteria: not taking ABX at all and taking ABX > 3 months, LOS > 2 weeks, age < 18
+
+(d) Design a prospective cohort study that will allow a researcher to test this hypothesis. Identify inclusion and exclusion criteria.
+
+
+Prospective cohort study will be a study following a group of patients over a period of time. The researcher will select patients undergoing surgery S. From these patients, the researcher will observe which patients have been expose to a full course of ABX within 3 months of the surgery. 
+
+Ans. 
+1) outcome = Develop post-surgery infection after surgery S. (Y/N)
+2) exposure = Full course of ABX within 3 months. (Y/N)
+3) inclusion criteria: will have surgery S, LOS <= 2 weeks, age >= 18, include equal numbers of both genders (M/F)
+4) exclusion criteria: LOS > 2 weeks, age < 18
+
+
+##### Section 4 : Creating Table 1. 
+Q5) Creating a Table 1: Under Assignments -> Assignment_II, read in the file called "smokedata.csv". The codebook is as follows:
+
+. ID:	Unique numeric identifier     
+. quit:	0= did not quit smoking in previous 12 months, 1= quit smoking in previous 12 months    
+. advice	0= reported ‘did not receive advice from healthcare provider regarding quitting smoking.’, 1= reported ‘did receive advice…’      
+. ill	0= no major illness diagnosed in previous 12 months, 1= major illness diagnosed in previous 12 months     
+. sex	0=male, 1=female      
+. educ	0= less than 12 years, 1= 12 years or more      
+. provtype	0= Physician, 1= Nurse Practitioner     
+. birth_yr	Four digit year of patient’s birth      
+. app_yr	Four digit year of patient’s appointment        
+. age_at_app*	Patient’s age at the appointment.
+
+*For simplicity, we will assume all patients have already had their birthday when they attend their appointment. Therefore, age should equal app_yr – birth_yr.
+
+The objective of the study behind the dataset was to determine the association between of providing smoking cessation advice to patients and whether they quit smoking during the same time period.
+
+Complete the attached Table 1 (Problem6_Table1.docx) and upload it into Canvas (you can upload either .docx or .pdf). Use the space below to show your work.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+# Insert code below
+smoke_data <- read.csv("smokedata.csv", header = TRUE)
+summary(smoke_data)
+
+#Clean up data: NA non-binary values and birth_yr
+
+smoke_data <- smoke_data[!(smoke_data$quit!="1" & smoke_data$quit!="0"),] #don't forget comma
+#do not include unless (!=) 1 or 0
+smoke_data <- smoke_data[!(smoke_data$birth_yr<1912 | smoke_data$birth_yr>2005),]
+#do not include birth year <1912 or >2005
+smoke_data <- smoke_data[!(smoke_data$age_at_appt<18 | smoke_data$age_at_appt>100),]
+#do not include age_at_appt <18 or >100
+smoke_data <- smoke_data[!(smoke_data$appt_yr!="2012"),] 
+#do not include if appt-year unless (!=) 2012 (everything should be 2012 here)
+
+summary(smoke_data)
+  
+#TOTAL Quitter and Non-Quitters
+d.total_non_quitter <- smoke_data[which(smoke_data$quit == "0"),]
+nrow(d.total_non_quitter)
+
+d.total_quitter <- smoke_data[which(smoke_data$quit == "1"),]
+nrow(d.total_quitter)
+
+#Find Count, Percentage, and p-value for Age and mean(SD) in years for Non-Quitters vs. Quitters
+
+cat("Mean age for Non-Quitters",mean(d.total_non_quitter$age_at_appt), "\n")
+cat("Std for age for Non-Quitters",sd(d.total_non_quitter$age_at_appt), "\n")
+
+cat("Mean age for Quitters",mean(d.total_quitter$age_at_appt), "\n")
+cat("Std for age for Quitters",sd(d.total_quitter$age_at_appt), "\n")
+
+t.test(d.total_non_quitter$age_at_appt, d.total_quitter$age_at_appt)
+
+#Make a 2x2 table for quit vs. sex 
+gender_table <- with(smoke_data,table(quit,sex))
+print(gender_table)
+
+#Percentage and p-value for gender in Non-quitters vs. Quitters
+print(gender_table/nrow(smoke_data)*100)
+
+chisq.test(gender_table)
+
+#Make a 2x2 table for quit vs. major illness
+majorill_table <- with(smoke_data,table(quit,ill))
+print(majorill_table)
+
+#Find Percentage and p-value for Major Illness in Non-Quitters vs. Quitters 
+print(majorill_table/nrow(smoke_data)*100)
+
+chisq.test(majorill_table)
+
+#Make a 2x2 Table for quit vs. educ
+educ_table <- with(smoke_data,table(quit,educ))
+print(educ_table)
+
+#Find Percentage and p-value among <12yo and >12yo in Non-Quitters vs. Quitters
+print(educ_table/nrow(smoke_data)*100)
+
+chisq.test(educ_table)
+
+#Make a 2x2 Table for quit vs. smoking advice
+advice_table <- with(smoke_data,table(quit,advice))
+print(advice_table)
+
+#Find Percentage and p-value for Smoking Advice in Non-Quitters vs. Quitters
+print(advice_table/nrow(smoke_data)*100)
+
+chisq.test(advice_table)
+
+#Make a 2x2 Table for quit vs. provider type
+provider_table <- with(smoke_data,table(quit,provtype))
+print(provider_table)
+
+
+#Find Percentage and p-value for Provider Type in Non-Quitters vs. Quitters
+print(provider_table/nrow(smoke_data)*100)
+
+chisq.test(provider_table)
+
+```

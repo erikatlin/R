@@ -1,0 +1,277 @@
+---
+title: "Assignment I"
+author: ""
+date: "January 28, 2019"
+output: html_document
+---
+
+
+#### Instructions
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+x_int <- c(1, 2, 3)
+x_int
+```
+
+
+> Please submit your answers by 5:59 pm on 01/21/2019
+
+#### Section 1: Probability : Total points 50
+
+
+Q1. Which of the following numbers cannot be probability? Explain why.     
+
+a) -0.0001
+b) 0.05
+c) 3.415
+d) 20%
+e) 1
+
+Ans 1. The probability must lie between 0 and 1. 0 indicates impossible, while 1 indicates certain. Probability can also be represented by percentage, decimal, or fraction. 
+A) There cannot be a negative probability indicating it is impossible for an event to occur. 
+C) This is greater than 1 and cannot occur.  
+
+Q2. A card is drawn randomly from a deck of ordinary playing cards. The game rules are that you win if the card is a spade or an ace. What is the probability that you will win the game?
+
+Ans 2. P(S) = 13/52; P(A) = 4/52; P(S and A) = 1/52
+P(S or A) = P(S) + P(A) - P(S and A) 
+          = 13/52 + 4/52 - 1/52
+          = 16/52 = 4/13
+ 
+Q3. An urban hospital has a 20% mortality rate on average for admitted patients. If on a particular day, 17 patients got admitted, what are:
+
+a) the chances that exactly 7 will survive? n = 17, k = 7 
+factorial(17)/((factorial(7) * factorial(10)) x (0.8)^7 x (0.2)^10 = 0.042%
+
+
+b) the chances that at least 15 patients will survive? P(X>=15) = P(X=15, 16, 17)  
+(17,15): factorial(17)/((factorial(15) * factorial(2)) x (0.8)^15 x (0.2)^2 = 0.19
+(17,16): factorial(17)/((factorial(16) * factorial(1)) x (0.8)^16 x (0.2)^1 = 0.096
+(17,17): factorial(17)/((factorial(17) * factorial(0)) X (0.8)^17 x (0.2)^0 = 0.0225
+
+P(15) + P (16) + P(17) = 0.31 = 31%
+
+Ans 3. a) 0.042% ; b) 31%
+
+Q4. Let F and G be two events such that P(F) is 0.4, P(G) is 0.8. F and G are independent events. Fill in the remaining elements of the table. 
+
+Table    | $G$ | $\bar{G}$ | Marginal
+---------|-----|-----------|----------
+$F$      | 0.32|    0.08   |    0.4
+$\bar{F}$| 0.48|    0.12   |    0.6
+Marginal |  0.8|      0.2  |    1
+
+
+Q5. Let F and G be two events such that P(F) is 0.2, P(G) is 0.7. Now, the conditional probability P(G|F) is given as 0.4. Fill in the remaining elements of the table. #conditional versus independent
+
+Table    | $G$ | $\bar{G}$ | Marginal
+---------|-----|-----------|----------
+$F$      | 0.08|   0.12    |    0.2
+$\bar{F}$| 0.62|   0.18    |    0.8
+Marginal |  0.7|    0.3    |    1
+
+
+Q6. A survey was conducted among 100 patients about smoking status. The following is the sample size split by smoking status (Yes or No) and gender (Male or Female). 
+
+
+Table    | Smoking (Yes) | Smoking(No) | Total
+---------|---------------|-------------|----------
+Male     |      19       |       36    | 55
+Female   |      13       |       32    | 45
+Total    |      32       |       68    | 100 
+
+
+The probability that a randomly selected patient is a male who smokes is 0.19.  
+
+(a) Fill in all the elements of the table
+
+
+(b) What is the probability of a randomly selected patient being a female? P(F) = 45/100 = 0.45   
+ 
+
+(c) What is the probability of a randomly selected patient being a smoker? P(S) = 32/100 = 0.32    
+
+
+(d)  What is the probability of a randomly selected smoker being a female? P(S and F) = 13/32 = 0.406 ~ 0.41   
+
+
+#### Section 2: Data Analysis using R: Total points 25
+
+
+Q1 : Using the dataset provided ("sample_patient_dataset.csv"), the task to build a 2x2 table for the studying the association between age at admission >70 and cardiac arrests. You can either use the sample table given below or build your own. Rememer to output both count and % in the table. Be sure to round the % to the nearest integer (e.g, 0.674 will be 67% and 0.675 will be 68%, see notes in Lecture2 on summary statistics as example). Fill in the code in the shaded areas.
+
+
+Table         | Cardiac Arrests (Yes) | Cardiac Arrests (No) | Total
+--------------|-----------------------|----------------------|----------
+Age > 70 (%)  |       453 (2%)        |     4728 (20%)       |  5181 (21%)
+Age <= 70 (%) |      1672 (7%)        |    17,254 (72%)      | 18,926 (79%)
+Total         |     2125  (9%)        |    21982  (91%)      | 24,107
+
+
+```{r}
+### Insert code here
+rm(list=ls())
+library(plyr)
+library(dplyr)
+library(lubridate)
+
+patient.data <- read.csv("sample_patient_dataset.csv", header = TRUE)
+
+
+#convert dob and hosp_admisison to mdy
+patient.data$dob_formatted <- mdy(patient.data$dob)
+patient.data$hosp_admission <- mdy(patient.data$hosp_admission)
+
+#create age_at_admit column and calculate age
+patient.data <- mutate(patient.data, age_at_admit = interval(dob_formatted, hosp_admission) / dyears(1))
+head(patient.data)
+
+
+#TOTAL patients age greater than 70
+d.greaterthan70 <- patient.data %>%
+  filter(age_at_admit > 70 ) %>%
+  nrow()
+d.greaterthan70
+
+#percentage of TOTAL patients age greater than 70 out of TOTAL
+round((d.greaterthan70/n_patients)*100)
+
+#TOTAL patients age less than or equal to 70 
+d.lessthan70 <- patient.data %>%
+  filter(age_at_admit <= 70 ) %>%
+  nrow()
+d.lessthan70
+
+#percentage of TOTAL patients age less than or equal to 70 out of TOTAL
+round((d.lessthan70/n_patients)*100)
+
+#TOTAL patients with cardiac arrest
+d.ca <- patient.data %>%
+  filter(had_cardiac_arrests == 1) %>%
+  nrow()
+d.ca
+
+#percentage of TOTAL patients with cardiac arrest out of TOTAL
+round((d.ca/n_patients)*100)
+
+#TOTAL patients with no cardiac arrest
+d.noca <- patient.data %>%
+  filter(had_cardiac_arrests == 0) %>%
+  nrow()
+d.noca
+
+#percentage of TOTAL patients with no cardiac arrest out of TOTAL
+round((d.noca/n_patients)*100)
+
+#greater than 70 with cardiac arrest 
+d.greaterthan70_ca <- patient.data %>%
+  filter(age_at_admit > 70, had_cardiac_arrests == 1) %>%
+  nrow()
+d.greaterthan70_ca
+
+#calculate the percentage of greater than 70 with cardiac arrest 
+round((d.greaterthan70_ca/n_patients)*100)
+
+#less than or equal to 70 with cardiac arrest
+d.lessthan70_ca <- patient.data%>%
+  filter(age_at_admit <= 70, had_cardiac_arrests==1) %>%
+  nrow()
+d.lessthan70_ca
+
+#calculate the percentage of less than 70 with cardiac arrest
+round((d.lessthan70_ca/n_patients)*100)
+
+#greater than 70 with no cardiac arrest 
+d.greaterthan70_noca <- patient.data %>%
+  filter(age_at_admit > 70, had_cardiac_arrests ==0) %>%
+  nrow()
+d.greaterthan70_noca
+
+#calculate the percentage of greater than 70 with no cardiac arrest
+round((d.greaterthan70_noca/n_patients)*100)
+
+#less than or equal to 70 with no cardiac arrest
+d.lessthan70_noca <- patient.data %>%
+  filter(age_at_admit <= 70, had_cardiac_arrests ==0) %>%
+  nrow()
+d.lessthan70_noca
+
+#calculate the percentage of less than 70 with no cardiac arrest
+round((d.lessthan70_noca/n_patients)*100)
+  
+```
+
+
+
+Q2: Create your own de-identified version of "patient_dataset.csv". Upload your de-identified dataset onto Canvas and write the de-identification code below. You will need to refer to the document "Deidentification.pdf" (on Canvas, look under files -> lectures -> lecture_2).
+
+### Insert code here
+```{r}
+### Insert code here
+rm(list=ls())
+library(plyr)
+library(dplyr) 
+library(lubridate)
+
+d.in <-read.csv("patient_dataset.csv", header = TRUE)
+
+#create random set of ids
+all.patients <- d.in %>%
+  select(patient.ids) %>%
+  unique()
+all.patients$random_id <- sample(nrow(all.patients), replace = FALSE)
+
+#add random set of ids to the dataset
+d.in <- merge(d.in, all.patients, by ="patient.ids")
+
+#remove original patient identifiers
+d.in <- d.in %>%
+  select(-c(patient.ids))
+
+#remove patient names
+d.in <- d.in %>%
+  select(-c(patient.names))
+  
+#remove street address, city, and zip code 
+d.in <- d.in %>%
+  select(-c(street_address, city, zip_code))
+
+#remove contact number
+d.in <- d.in %>% 
+  select(-c(contact_number))
+
+#change hosp_admission and hosp_discharge to mdy
+d.in <- d.in %>%
+  mutate(hosp_admission_form = mdy(hosp_admission),
+         hosp_discharge_form = mdy(hosp_discharge))
+
+#generate random set of days between 1 and 365 
+num_patients <- nrow(d.in)
+random_shift <- sample(seq(1,365), size=num_patients, replace=TRUE)
+
+#hospital admission and discharge dates
+d.in <- d.in %>%
+  mutate(hosp_admission_deid = hosp_admission_form + ddays(random_shift), hosp_discharge_deid = hosp_discharge_form + ddays(random_shift))
+
+#remove dob
+d.in <- d.in %>%
+  mutate(dob_form=mdy(d.in$dob)) %>%
+  mutate(temp_interval= interval(dob_form, hosp_admission_form)) %>%
+  mutate(age_at_admit = temp_interval / dyears(1))
+
+#removing HIPAA columns
+d.in <- d.in %>%
+  select(-c(hosp_admission, hosp_discharge, hosp_admission_form, hosp_discharge_form, dob, dob_form, temp_interval))
+
+#remove provider care information
+d.in <- d.in %>%
+  select(-c(admitting_provider))
+
+#save de-identified dataset
+write.csv(d.in, "~/Documents/Health Informatics/UChicago/R/Homework/Assignment 1/de-identified dataset_erikalin.csv", row.names = FALSE, quote = TRUE)
+
+```
