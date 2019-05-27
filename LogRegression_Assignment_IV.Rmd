@@ -7,8 +7,6 @@ output:
   html_document: default
 ---
 
-> Please submit your answers by 5.59 pm Monday March 4, 2019
-
 
 ## Question 1: Prediction using Logistic Regression
 We are going to perform perdiction on a voting dataset (files->assignments->assignment_4). The dataset contains the  party affliation of 435 congressional members along with voting record on 16 issues that were put to vote in a single year. The party affliation is indicated as a binary variable as a 1 if the congress-person was a member of the 'A' party and 0 otherwise. The vote is indicated as 1 (if the member voted yes) and 0 (if ithe member voted no).
