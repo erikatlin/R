@@ -5,10 +5,6 @@ date: "February 11, 2019"
 output: html_document
 ---
 
-
-> Please submit your answers by 5:59 pm on Feb 11, 2019. Remember to show your work. In other words, always use echo=TRUE for the R code chunks that you provide. NOTE - All plots must show proper title, axis lables, and any legends used. Points will be deducted otherwise.  
-
-
 ## Question 1: Simple Linear Regression
 We are going to work with the dataset bike_data.csv (provided in Files->Assignments->Assignment_3). This dataset has been dowloaded from Kaggle, which is an online prediction contest website (see https://www.kaggle.com/c/bike-sharing-demand/data). The data is essentially the log of hourly bike rentals in a city over two years. The following is the codebook:
 
