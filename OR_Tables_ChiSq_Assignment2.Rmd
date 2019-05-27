@@ -7,7 +7,6 @@ output:
   pdf_document: default
 ---
 
-> Please submit your answers by 5.59 pm Monday February 4, 2019.  Remember to show your work. In other words, always use echo=TRUE for the R code chunks that you provide. NOTE - All plots must show proper title, axis lables, and any legends used. Points will be deducted otherwise. Submissions must be made in HTML. Problem 6 has an additional submission to be made in DOCX or PDF format. 
 
 ##### Initialization
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
