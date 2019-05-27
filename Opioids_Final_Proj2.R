@@ -1,3 +1,5 @@
+####We took a look at how GPO (pharmaceutical) funding affected # of opioid prescriptions in relations to opioid-related mortality.
+
 
 #Libraries ####
 library(dplyr)
